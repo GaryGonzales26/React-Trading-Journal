@@ -1,0 +1,22 @@
+{
+  "name": "Trading Journal",
+  "short_name": "Trading Journal",
+  "description": "Professional trading journal with analytics and performance tracking",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3b82f6",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/vite.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["finance", "productivity", "business"],
+  "lang": "en",
+  "scope": "/"
+}
+
