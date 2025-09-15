@@ -44,8 +44,8 @@ const Navbar = () => {
               </svg>
             </div>
             <div className="hidden sm:block">
-              <div className="text-lg sm:text-xl lg:text-2xl font-bold community-title">Trading Dashboard</div>
-              <div className="text-xs sm:text-sm text-gradient font-medium">Professional Trading Tracker</div>
+              <div className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 dark:text-white">Trading Dashboard</div>
+              <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 font-medium">Professional Trading Tracker</div>
             </div>
           </Link>
 

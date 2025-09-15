@@ -37,7 +37,16 @@ export const AuthProvider = ({ children }) => {
     const loadingTimeout = setTimeout(() => {
       console.log('Auth loading timeout - setting loading to false')
       setLoading(false)
-    }, 10000) // 10 second timeout
+    }, 5000) // Reduced to 5 second timeout
+
+    // Handle visibility change to stop loading when tab is not focused
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        setLoading(false)
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
 
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -57,6 +66,11 @@ export const AuthProvider = ({ children }) => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
+      // Only show loading for sign in/out events, not when tab regains focus
+      if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
+        setLoading(true)
+      }
+      
       setUser(session?.user ?? null)
       if (session?.user) {
         // Wait a moment for the session to be fully established
@@ -72,6 +86,7 @@ export const AuthProvider = ({ children }) => {
     return () => {
       subscription.unsubscribe()
       clearTimeout(loadingTimeout)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
   }, [])
 
