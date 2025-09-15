@@ -11,11 +11,11 @@ const SetupGuide = ({ onClose }) => {
       content: (
         <div className="space-y-2">
           <p>• Go to <a href="https://supabase.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">supabase.com</a></p>
-          <p>• Click "New Project"</p>
-          <p>• Enter project name: "Trading Journal"</p>
+          <p>• Click &quot;New Project&quot;</p>
+          <p>• Enter project name: &quot;Trading Journal&quot;</p>
           <p>• Set a strong database password</p>
           <p>• Choose a region close to you</p>
-          <p>• Click "Create new project"</p>
+          <p>• Click &quot;Create new project&quot;</p>
         </div>
       )
     },
@@ -34,11 +34,11 @@ const SetupGuide = ({ onClose }) => {
       content: (
         <div className="space-y-2">
           <p>• Go to SQL Editor in your Supabase dashboard</p>
-          <p>• Click "New Query"</p>
+          <p>• Click &quot;New Query&quot;</p>
           <p>• Copy and paste the contents of <code className="bg-gray-100 px-1 rounded">CLEAN_EVERYTHING.sql</code></p>
-          <p>• Click "Run" to execute</p>
+          <p>• Click &quot;Run&quot; to execute</p>
           <p>• Then copy and paste the contents of <code className="bg-gray-100 px-1 rounded">DATABASE_SETUP.sql</code></p>
-          <p>• Click "Run" to execute</p>
+          <p>• Click &quot;Run&quot; to execute</p>
         </div>
       )
     },
@@ -51,7 +51,7 @@ const SetupGuide = ({ onClose }) => {
           <p>• Go to Settings → Environment Variables</p>
           <p>• Add: <code className="bg-gray-100 px-1 rounded">NEXT_PUBLIC_SUPABASE_URL</code> = your project URL</p>
           <p>• Add: <code className="bg-gray-100 px-1 rounded">NEXT_PUBLIC_SUPABASE_ANON_KEY</code> = your anon key</p>
-          <p>• Click "Save" for each variable</p>
+          <p>• Click &quot;Save&quot; for each variable</p>
         </div>
       )
     },
@@ -60,7 +60,7 @@ const SetupGuide = ({ onClose }) => {
       content: (
         <div className="space-y-2">
           <p>• Go to Deployments in Vercel</p>
-          <p>• Click "Redeploy" on your latest deployment</p>
+          <p>• Click &quot;Redeploy&quot; on your latest deployment</p>
           <p>• Wait for deployment to complete</p>
           <p>• Refresh this page and try logging in again</p>
         </div>
