@@ -94,6 +94,26 @@ export const AuthProvider = ({ children }) => {
     if (!supabase) {
       return
     }
+
+    // Check localStorage first
+    const cachedProfile = localStorage.getItem(`profile_${userId}`)
+    if (cachedProfile) {
+      try {
+        const profile = JSON.parse(cachedProfile)
+        // Check if cache is less than 5 minutes old
+        const cacheTime = localStorage.getItem(`profile_${userId}_time`)
+        if (cacheTime && Date.now() - parseInt(cacheTime) < 5 * 60 * 1000) {
+          console.log('Using cached profile data')
+          setProfile(profile)
+          return
+        }
+      } catch (error) {
+        console.warn('Error parsing cached profile:', error)
+        // Clear invalid cache
+        localStorage.removeItem(`profile_${userId}`)
+        localStorage.removeItem(`profile_${userId}_time`)
+      }
+    }
     
     try {
       // Add timeout to prevent hanging
@@ -104,7 +124,7 @@ export const AuthProvider = ({ children }) => {
         .single()
 
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Profile fetch timeout')), 10000)
+        setTimeout(() => reject(new Error('Profile fetch timeout')), 5000) // Reduced timeout
       )
 
       const { data, error } = await Promise.race([profilePromise, timeoutPromise])
@@ -119,46 +139,63 @@ export const AuthProvider = ({ children }) => {
         const { data: userData } = await supabase.auth.getUser()
         
         if (userData?.user) {
-          const { data: newProfile, error: createError } = await supabase
-            .from('user_profiles')
-            .insert([
-              {
-                id: userId,
-                email: userData.user.email,
-                full_name: userData.user.user_metadata?.full_name || 'User',
-                created_at: new Date().toISOString()
-              }
-            ])
-            .select()
-            .single()
+          const basicProfile = {
+            id: userId,
+            full_name: userData.user.user_metadata?.full_name || 'User',
+            email: userData.user.email,
+            created_at: new Date().toISOString()
+          }
 
-          if (createError) {
-            console.error('Error creating profile on login:', createError)
-            // Set a basic profile if creation fails
-            setProfile({
-              id: userId,
-              full_name: userData.user.user_metadata?.full_name || 'User',
-              email: userData.user.email,
-              created_at: new Date().toISOString()
-            })
-          } else {
-            setProfile(newProfile)
+          // Try to create profile in database
+          try {
+            const { data: newProfile, error: createError } = await supabase
+              .from('user_profiles')
+              .insert([basicProfile])
+              .select()
+              .single()
+
+            if (createError) {
+              console.error('Error creating profile on login:', createError)
+              // Use basic profile if creation fails
+              setProfile(basicProfile)
+              // Cache the basic profile
+              localStorage.setItem(`profile_${userId}`, JSON.stringify(basicProfile))
+              localStorage.setItem(`profile_${userId}_time`, Date.now().toString())
+            } else {
+              setProfile(newProfile)
+              // Cache the new profile
+              localStorage.setItem(`profile_${userId}`, JSON.stringify(newProfile))
+              localStorage.setItem(`profile_${userId}_time`, Date.now().toString())
+            }
+          } catch (dbError) {
+            console.error('Database error, using basic profile:', dbError)
+            setProfile(basicProfile)
+            // Cache the basic profile
+            localStorage.setItem(`profile_${userId}`, JSON.stringify(basicProfile))
+            localStorage.setItem(`profile_${userId}_time`, Date.now().toString())
           }
         }
       } else {
         setProfile(data)
+        // Cache the profile data
+        localStorage.setItem(`profile_${userId}`, JSON.stringify(data))
+        localStorage.setItem(`profile_${userId}_time`, Date.now().toString())
       }
     } catch (error) {
       console.error('Error fetching profile:', error)
       // Set a basic profile on error to prevent infinite loading
       const { data: userData } = await supabase.auth.getUser()
       if (userData?.user) {
-        setProfile({
+        const basicProfile = {
           id: userId,
           full_name: userData.user.user_metadata?.full_name || 'User',
           email: userData.user.email,
           created_at: new Date().toISOString()
-        })
+        }
+        setProfile(basicProfile)
+        // Cache the basic profile
+        localStorage.setItem(`profile_${userId}`, JSON.stringify(basicProfile))
+        localStorage.setItem(`profile_${userId}_time`, Date.now().toString())
       }
     }
   }
@@ -239,6 +276,16 @@ export const AuthProvider = ({ children }) => {
     try {
       const { error } = await supabase.auth.signOut()
       if (error) throw error
+      
+      // Clear user data and cache
+      setUser(null)
+      setProfile(null)
+      
+      // Clear localStorage cache
+      if (user?.id) {
+        localStorage.removeItem(`profile_${user.id}`)
+        localStorage.removeItem(`profile_${user.id}_time`)
+      }
     } catch (error) {
       console.error('Error signing out:', error)
     }
@@ -259,6 +306,13 @@ export const AuthProvider = ({ children }) => {
 
       if (error) throw error
       setProfile(data)
+      
+      // Update localStorage cache
+      if (user?.id) {
+        localStorage.setItem(`profile_${user.id}`, JSON.stringify(data))
+        localStorage.setItem(`profile_${user.id}_time`, Date.now().toString())
+      }
+      
       return { data, error: null }
     } catch (error) {
       return { data: null, error }
