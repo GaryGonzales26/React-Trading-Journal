@@ -3,6 +3,7 @@
 import React, { useState } from 'react'
 import LoginForm from './LoginForm'
 import RegisterForm from './RegisterForm'
+import SupabaseDiagnostic from '../SupabaseDiagnostic'
 
 const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true)
@@ -16,6 +17,7 @@ const AuthPage = () => {
           <RegisterForm onToggleMode={() => setIsLogin(true)} />
         )}
       </div>
+      <SupabaseDiagnostic />
     </div>
   )
 }

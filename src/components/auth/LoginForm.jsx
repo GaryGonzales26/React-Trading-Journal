@@ -26,16 +26,23 @@ const LoginForm = ({ onToggleMode }) => {
     setLoading(true)
     setError('')
 
-    const { data, error } = await signIn(formData.email, formData.password)
+    try {
+      const { data, error } = await signIn(formData.email, formData.password)
 
-    if (error) {
-      setError(error.message)
-    } else {
-      // Navigate to dashboard on successful login
-      router.push('/')
+      if (error) {
+        console.error('Login error:', error)
+        setError(error.message || 'Login failed. Please check your credentials.')
+      } else {
+        console.log('Login successful:', data)
+        // Navigate to dashboard on successful login
+        router.push('/')
+      }
+    } catch (err) {
+      console.error('Login exception:', err)
+      setError('An unexpected error occurred. Please try again.')
+    } finally {
+      setLoading(false)
     }
-
-    setLoading(false)
   }
 
   return (
