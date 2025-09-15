@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
+import SetupGuide from './SetupGuide'
 
 const SupabaseDiagnostic = () => {
   const [diagnostics, setDiagnostics] = useState({
@@ -11,6 +12,7 @@ const SupabaseDiagnostic = () => {
     auth: false,
     error: null
   })
+  const [showSetupGuide, setShowSetupGuide] = useState(false)
 
   useEffect(() => {
     runDiagnostics()
@@ -39,7 +41,11 @@ const SupabaseDiagnostic = () => {
             console.log('✅ Database connection successful')
           } else {
             console.log('❌ Database connection failed:', error)
-            newDiagnostics.error = error.message
+            if (error.code === 'PGRST116' || error.message.includes('relation "user_profiles" does not exist')) {
+              newDiagnostics.error = 'Database tables not created yet. Run DATABASE_SETUP.sql in Supabase SQL Editor.'
+            } else {
+              newDiagnostics.error = error.message
+            }
           }
         } catch (err) {
           console.log('❌ Database connection error:', err)
@@ -108,12 +114,25 @@ const SupabaseDiagnostic = () => {
           </div>
         )}
       </div>
-      <button 
-        onClick={runDiagnostics}
-        className="mt-2 text-xs bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
-      >
-        Refresh
-      </button>
+      <div className="mt-2 flex space-x-2">
+        <button 
+          onClick={runDiagnostics}
+          className="text-xs bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
+        >
+          Refresh
+        </button>
+        {(!diagnostics.connection || !diagnostics.tables) && (
+          <button 
+            onClick={() => setShowSetupGuide(true)}
+            className="text-xs bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600"
+          >
+            Setup Guide
+          </button>
+        )}
+      </div>
+      {showSetupGuide && (
+        <SetupGuide onClose={() => setShowSetupGuide(false)} />
+      )}
     </div>
   )
 }
